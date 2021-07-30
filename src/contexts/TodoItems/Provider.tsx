@@ -8,7 +8,7 @@ import {
 import { defaultState, TodoItemsState } from "./state";
 import { TodoItemsAction } from "./actions";
 import reducer from "./reducer";
-import {storageAvaiable} from '../context.service'
+import { storageAvaiable } from "../context.service";
 
 const localStorageKey = "todoListState";
 
@@ -33,8 +33,13 @@ export const TodoItemsContextProvider = ({
 }: PropsWithChildren<TodoItemsContextProviderProps>) => {
     const [state, dispatch] = useReducer((prevState: any, action: any) => {
         let nextState = reducer(prevState, action);
-        let count = JSON.stringify(nextState).length - JSON.stringify(prevState).length;
-        return count > 0 ? storageAvaiable(count) ? nextState : prevState : nextState;
+        let count =
+            JSON.stringify(nextState).length - JSON.stringify(prevState).length;
+        return count > 0
+            ? storageAvaiable(count)
+                ? nextState
+                : prevState
+            : nextState;
     }, defaultState);
 
     useEffect(() => {
