@@ -1,23 +1,10 @@
 import Container from "@material-ui/core/Container";
 import Typography from "@material-ui/core/Typography";
-import { createMuiTheme } from "@material-ui/core/styles";
-import { ThemeProvider } from "@material-ui/styles";
-import { TodoItemsList } from "./TodoItems";
-import { TodoItemsContextProvider, useTodoItems } from "./contexts/TodoItems";
+import { TodoItemsList } from "./TodoItemList";
+import { useTodoItems } from "../contexts/TodoItems";
 import TodoItemForm from "./TodoItemForm";
 import { motion } from "framer-motion";
 import { makeStyles } from "@material-ui/core/styles";
-
-const theme = createMuiTheme({
-    palette: {
-        primary: {
-            main: "#9012fe",
-        },
-        secondary: {
-            main: "#b2aabf",
-        },
-    },
-});
 
 const spring = {
     type: "spring",
@@ -25,16 +12,6 @@ const spring = {
     stiffness: 120,
     duration: 0.25,
 };
-
-function App() {
-    return (
-        <TodoItemsContextProvider>
-            <ThemeProvider theme={theme}>
-                <Content />
-            </ThemeProvider>
-        </TodoItemsContextProvider>
-    );
-}
 
 const useContentStyles = makeStyles(() => ({
     root: {
@@ -74,7 +51,7 @@ const useContentStyles = makeStyles(() => ({
     },
 }));
 
-function Content() {
+const Content = () => {
     const classes = useContentStyles();
     const { todoItems } = useTodoItems();
 
@@ -105,6 +82,5 @@ function Content() {
             </main>
         </Container>
     );
-}
-
-export default App;
+};
+export default Content;

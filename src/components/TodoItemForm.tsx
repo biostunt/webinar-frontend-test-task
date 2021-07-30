@@ -2,7 +2,7 @@ import {
     TodoItemFormValues,
     useTodoItems,
     todoItemsActions,
-} from "./contexts/TodoItems";
+} from "../contexts/TodoItems";
 import { useForm, Controller } from "react-hook-form";
 import TextField from "@material-ui/core/TextField";
 import Switch from "@material-ui/core/Switch";
@@ -16,7 +16,7 @@ import {
     browserSupportsNotification,
     sendNotification,
     convertNotificationDateToTimestamp,
-} from "./notificationControl";
+} from "../notificationControl";
 
 const useInputStyles = makeStyles(() => ({
     root: {
