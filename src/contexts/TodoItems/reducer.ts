@@ -17,35 +17,45 @@ const reducer = (
             case "loadState":
                 return action.data;
             case "add":
-                return {
-                    ...draftState,
-                    todoItems: [
-                        { id: generateId(), done: false, ...action.data },
-                        ...draftState.todoItems,
-                    ],
-                };
+                draftState.todoItems.unshift({
+                    id: generateId(),
+                    done: false,
+                    ...action.data,
+                });
+                return draftState;
             case "delete":
-                return {
-                    ...draftState,
-                    todoItems: draftState.todoItems.filter(
-                        ({ id }) => id !== action.data
-                    ),
-                };
+                draftState.todoItems = draftState.todoItems.filter(
+                    ({ id }) => id !== action.data
+                );
+                return draftState;
             case "toggleDone":
                 const itemIndex = draftState.todoItems.findIndex(
                     ({ id }) => id === action.data
                 );
                 const item = draftState.todoItems[itemIndex];
-                return {
-                    ...draftState,
-                    todoItems: [
-                        ...draftState.todoItems.slice(0, itemIndex),
-                        { ...item, done: !item.done },
-                        ...draftState.todoItems.slice(itemIndex + 1),
-                    ],
-                };
+                draftState.todoItems = [
+                    ...draftState.todoItems.slice(0, itemIndex),
+                    { ...item, done: !item.done },
+                    ...draftState.todoItems.slice(itemIndex + 1),
+                ];
+                return draftState;
+            case "addItemToChange":
+                draftState.itemToChange = draftState.todoItems.find(
+                    (item) => item.id === action.data
+                );
+                return draftState;
+            case "deleteItemToChange":
+                draftState.itemToChange = undefined;
+                return draftState;
+            case "changeItem":
+                console.log("changeItem");
+                const index = draftState.todoItems.findIndex(
+                    ({ id }) => id === action.data.id
+                );
+                draftState.todoItems[index] = action.data;
+                return draftState;
             default:
-                return state;
+                return draftState;
         }
     });
 

@@ -2,6 +2,7 @@ import {
     TodoItemFormValues,
     useTodoItems,
     todoItemsActions,
+    TodoItem,
 } from "../contexts/TodoItems";
 import { useForm, Controller } from "react-hook-form";
 import TextField from "@material-ui/core/TextField";
@@ -12,11 +13,7 @@ import Tooltip from "@material-ui/core/Tooltip";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import { makeStyles } from "@material-ui/core/styles";
 import { useState } from "react";
-import {
-    browserSupportsNotification,
-    sendNotification,
-    convertNotificationDateToTimestamp,
-} from "../notificationControl";
+import Notifications from "../notification-control";
 
 const useInputStyles = makeStyles(() => ({
     root: {
@@ -30,42 +27,44 @@ const useInputStyles = makeStyles(() => ({
     },
 }));
 
-export default function TodoItemForm() {
+interface TodoItemPropsForm {
+    formType: "Add" | "Change";
+    data?: TodoItemFormValues;
+    onFinish: (data: TodoItemFormValues) => void;
+}
+const TodoItemForm = (props: TodoItemPropsForm) => {
     const classes = useInputStyles();
-    const { dispatch } = useTodoItems();
 
-    const getDefaultFormValues = (): TodoItemFormValues => ({
-        title: "",
-        details: "",
-        notificationRequire: false,
-        notificationDate: new Date().toJSON().split("T")[0],
-        notificationTime: new Date()
-            .toLocaleString()
-            .split(", ")[1]
-            .split(":")
-            .slice(0, 2)
-            .join(":"),
-    });
+    const getDefaultFormValues = (): TodoItemFormValues =>
+        props.data
+            ? props.data
+            : {
+                  title: "",
+                  details: "",
+                  notificationRequire: false,
+                  notificationDate: new Date().toJSON().split("T")[0],
+                  notificationTime: new Date()
+                      .toLocaleString()
+                      .split(", ")[1]
+                      .split(":")
+                      .slice(0, 2)
+                      .join(":"),
+              };
     const { control, handleSubmit, reset, watch } =
         useForm<TodoItemFormValues>();
 
-    const [notificationRequire, setNotificationRequire] = useState(false);
-    const canNotify = browserSupportsNotification();
+    const [notificationRequire, setNotificationRequire] = useState(
+        props.data?.notificationRequire || false
+    );
+    const canNotify = Notifications.browserSupportsNotification();
     return (
         <form
             onSubmit={handleSubmit((formData) => {
-                dispatch(todoItemsActions.addItem(formData));
-                if (formData.notificationRequire)
-                    sendNotification({
-                        title: formData.title,
-                        body: formData.details || "",
-                        timestamp: convertNotificationDateToTimestamp(
-                            formData.notificationDate,
-                            formData.notificationTime
-                        ),
-                    });
+                props.onFinish(formData);
                 reset(getDefaultFormValues());
-                setNotificationRequire(false);
+                setNotificationRequire(
+                    props.data?.notificationRequire || false
+                );
             })}
         >
             <Controller
@@ -166,10 +165,66 @@ export default function TodoItemForm() {
                 variant="contained"
                 color="primary"
                 type="submit"
-                disabled={!watch("title")}
+                disabled={!watch("title") && props.formType === "Add"}
             >
-                Add
+                {props.formType}
             </Button>
         </form>
     );
+};
+
+export const TodoItemAddForm = () => {
+    const { dispatch } = useTodoItems();
+
+    const handleSubmit = (data: TodoItemFormValues) => {
+        let notificationId: string = "";
+        if (data.notificationRequire)
+            notificationId = Notifications.sendNotification({
+                title: data.title,
+                body: data.details || "",
+                timestamp: Notifications.notificationDateToTimestamp(
+                    data.notificationDate,
+                    data.notificationTime
+                ),
+            });
+        dispatch(todoItemsActions.addItem({ ...data, notificationId }));
+    };
+    return <TodoItemForm formType="Add" onFinish={handleSubmit.bind(this)} />;
+};
+
+interface TodoItemChangeFormProps {
+    data: TodoItem;
+    onFinish: () => void;
 }
+export const TodoItemChangeForm = (props: TodoItemChangeFormProps) => {
+    const { data, onFinish } = props;
+    const { dispatch } = useTodoItems();
+    const handleSubmit = (formData: TodoItemFormValues) => {
+        let notificationId: string = "";
+        Notifications.deleteNotificationTask(formData.notificationId || "");
+        if (formData.notificationRequire)
+            notificationId = Notifications.sendNotification({
+                title: formData.title,
+                body: formData.details || "",
+                timestamp: Notifications.notificationDateToTimestamp(
+                    formData.notificationDate,
+                    formData.notificationTime
+                ),
+            });
+        dispatch(
+            todoItemsActions.changeItem({
+                ...data,
+                ...formData,
+                notificationId,
+            })
+        );
+        onFinish();
+    };
+    return (
+        <TodoItemForm
+            formType="Change"
+            data={{ ...data }}
+            onFinish={handleSubmit.bind(this)}
+        />
+    );
+};

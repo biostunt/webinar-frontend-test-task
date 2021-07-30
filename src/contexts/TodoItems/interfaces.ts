@@ -4,6 +4,7 @@ export interface TodoItemFormValues {
     notificationRequire: boolean;
     notificationDate: string;
     notificationTime: string;
+    notificationId?: string;
 }
 
 export interface TodoItem extends TodoItemFormValues {

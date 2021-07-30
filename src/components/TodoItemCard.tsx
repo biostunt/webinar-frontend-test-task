@@ -7,6 +7,7 @@ import IconButton from "@material-ui/core/IconButton";
 import Checkbox from "@material-ui/core/Checkbox";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import DeleteIcon from "@material-ui/icons/Delete";
+import ChangeIcon from "@material-ui/icons/Create";
 import { makeStyles } from "@material-ui/core/styles";
 import classnames from "classnames";
 import {
@@ -14,7 +15,7 @@ import {
     useTodoItems,
     todoItemsActions,
 } from "../contexts/TodoItems";
-import { convertNotificationDateToTimestamp } from "../notificationControl";
+import Notifications from "../notification-control";
 
 const useTodoItemCardStyles = makeStyles({
     root: {
@@ -30,9 +31,14 @@ const useTodoItemCardStyles = makeStyles({
     },
 });
 
-const TodoItemCard = function ({ item }: { item: TodoItem }) {
+const TodoItemCard = ({ item }: { item: TodoItem }) => {
     const classes = useTodoItemCardStyles();
     const { dispatch } = useTodoItems();
+
+    const handleChange = useCallback(
+        () => dispatch(todoItemsActions.addItemToChange(item.id)),
+        [item.id, dispatch]
+    );
 
     const handleDelete = useCallback(
         () => dispatch(todoItemsActions.deleteItem(item.id)),
@@ -52,9 +58,14 @@ const TodoItemCard = function ({ item }: { item: TodoItem }) {
         >
             <CardHeader
                 action={
-                    <IconButton aria-label="delete" onClick={handleDelete}>
-                        <DeleteIcon />
-                    </IconButton>
+                    <>
+                        <IconButton aria-label="change" onClick={handleChange}>
+                            <ChangeIcon />
+                        </IconButton>
+                        <IconButton aria-label="delete" onClick={handleDelete}>
+                            <DeleteIcon />
+                        </IconButton>
+                    </>
                 }
                 title={
                     <FormControlLabel
@@ -85,7 +96,7 @@ const TodoItemCard = function ({ item }: { item: TodoItem }) {
                         >
                             Notify in{" "}
                             {new Date(
-                                convertNotificationDateToTimestamp(
+                                Notifications.notificationDateToTimestamp(
                                     item.notificationDate,
                                     item.notificationTime
                                 )

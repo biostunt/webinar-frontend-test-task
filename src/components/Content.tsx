@@ -2,9 +2,10 @@ import Container from "@material-ui/core/Container";
 import Typography from "@material-ui/core/Typography";
 import { TodoItemsList } from "./TodoItemList";
 import { useTodoItems } from "../contexts/TodoItems";
-import TodoItemForm from "./TodoItemForm";
+import { TodoItemAddForm } from "./TodoItemForm";
 import { motion } from "framer-motion";
 import { makeStyles } from "@material-ui/core/styles";
+import TodoItemCardChangeModal from "./TodoItemCardChangeModal";
 
 const spring = {
     type: "spring",
@@ -68,7 +69,7 @@ const Content = () => {
                     transition={spring}
                     layout={true}
                 >
-                    <TodoItemForm />
+                    <TodoItemAddForm />
                 </motion.div>
                 {todoItems.length ? (
                     <motion.div
@@ -80,6 +81,7 @@ const Content = () => {
                     </motion.div>
                 ) : null}
             </main>
+            <TodoItemCardChangeModal />
         </Container>
     );
 };
