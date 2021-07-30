@@ -1,19 +1,20 @@
-import { useCallback } from 'react';
-import Card from '@material-ui/core/Card';
-import CardHeader from '@material-ui/core/CardHeader';
-import CardContent from '@material-ui/core/CardContent';
-import Typography from '@material-ui/core/Typography';
-import IconButton from '@material-ui/core/IconButton';
-import Checkbox from '@material-ui/core/Checkbox';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import DeleteIcon from '@material-ui/icons/Delete';
-import { makeStyles } from '@material-ui/core/styles';
-import classnames from 'classnames';
-import { motion } from 'framer-motion';
-import { TodoItem, useTodoItems } from './TodoItemsContext';
+import { useCallback } from "react";
+import Card from "@material-ui/core/Card";
+import CardHeader from "@material-ui/core/CardHeader";
+import CardContent from "@material-ui/core/CardContent";
+import Typography from "@material-ui/core/Typography";
+import IconButton from "@material-ui/core/IconButton";
+import Checkbox from "@material-ui/core/Checkbox";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import DeleteIcon from "@material-ui/icons/Delete";
+import { makeStyles } from "@material-ui/core/styles";
+import classnames from "classnames";
+import { motion } from "framer-motion";
+import { TodoItem, useTodoItems, todoItemsActions } from "./contexts/TodoItems";
+import { convertNotificationDateToTimestamp } from "./notificationControl";
 
 const spring = {
-    type: 'spring',
+    type: "spring",
     damping: 25,
     stiffness: 120,
     duration: 0.25,
@@ -21,7 +22,7 @@ const spring = {
 
 const useTodoItemListStyles = makeStyles({
     root: {
-        listStyle: 'none',
+        listStyle: "none",
         padding: 0,
     },
 });
@@ -60,8 +61,11 @@ const useTodoItemCardStyles = makeStyles({
         marginBottom: 24,
     },
     doneRoot: {
-        textDecoration: 'line-through',
-        color: '#888888',
+        textDecoration: "line-through",
+        color: "#888888",
+    },
+    notificationRoot: {
+        fontSize: ".75rem",
     },
 });
 
@@ -70,17 +74,13 @@ export const TodoItemCard = function ({ item }: { item: TodoItem }) {
     const { dispatch } = useTodoItems();
 
     const handleDelete = useCallback(
-        () => dispatch({ type: 'delete', data: { id: item.id } }),
-        [item.id, dispatch],
+        () => dispatch(todoItemsActions.deleteItem(item.id)),
+        [item.id, dispatch]
     );
 
     const handleToggleDone = useCallback(
-        () =>
-            dispatch({
-                type: 'toggleDone',
-                data: { id: item.id },
-            }),
-        [item.id, dispatch],
+        () => dispatch(todoItemsActions.toggleDone(item.id)),
+        [item.id, dispatch]
     );
 
     return (
@@ -114,6 +114,23 @@ export const TodoItemCard = function ({ item }: { item: TodoItem }) {
                     <Typography variant="body2" component="p">
                         {item.details}
                     </Typography>
+                    {item.notificationRequire ? (
+                        <Typography
+                            className={classes.notificationRoot}
+                            align="center"
+                            variant="body2"
+                            component="p"
+                            color="textSecondary"
+                        >
+                            Notify in{" "}
+                            {new Date(
+                                convertNotificationDateToTimestamp(
+                                    item.notificationDate,
+                                    item.notificationTime
+                                )
+                            ).toLocaleString()}
+                        </Typography>
+                    ) : null}
                 </CardContent>
             ) : null}
         </Card>
