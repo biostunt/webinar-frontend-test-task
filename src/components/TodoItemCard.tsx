@@ -31,10 +31,9 @@ const useTodoItemCardStyles = makeStyles({
         fontSize: ".75rem",
     },
     deleteRoot: {
-        fontSize: ".75rem"
-    }
+        fontSize: ".75rem",
+    },
 });
-
 
 const TodoItemCardDestructTimer = () => {
     const classes = useTodoItemCardStyles();
@@ -42,18 +41,20 @@ const TodoItemCardDestructTimer = () => {
     useEffect(() => {
         let timeout = setTimeout(() => setRemainTime(remainTime - 1), 1000);
         return () => clearTimeout(timeout);
-    }, [remainTime])
-        return <Typography
-                className={classes.deleteRoot}
-                align="center"
-                variant="body2"
-                component="p"
-                color="textSecondary"
+    }, [remainTime]);
+    return (
+        <Typography
+            className={classes.deleteRoot}
+            align="center"
+            variant="body2"
+            component="p"
+            color="textSecondary"
         >
-            Will be deleted via  {`${Math.floor(remainTime / 60)}:${remainTime % 60}`} min. 
+            Will be deleted via{" "}
+            {`${Math.floor(remainTime / 60)}:${remainTime % 60}`} min.
         </Typography>
-}
-
+    );
+};
 
 const TodoItemCard = ({ item }: { item: TodoItem }) => {
     const classes = useTodoItemCardStyles();
@@ -78,20 +79,17 @@ const TodoItemCard = ({ item }: { item: TodoItem }) => {
         let timeout: NodeJS.Timeout | undefined;
         if (item.done) {
             timeout = setTimeout(() => {
-                dispatch(todoItemsActions.deleteItem(item.id))
+                dispatch(todoItemsActions.deleteItem(item.id));
             }, 300 * 1000);
         } else {
-            if (timeout)
-                clearTimeout(timeout)
+            if (timeout) clearTimeout(timeout);
         }
         return () => {
-            if(timeout) clearTimeout(timeout)
-        }
+            if (timeout) clearTimeout(timeout);
+        };
     }, [item.done]);
     return (
-        <Card
-            className={classes.root}
-        >
+        <Card className={classes.root}>
             <CardHeader
                 action={
                     <>
@@ -128,25 +126,23 @@ const TodoItemCard = ({ item }: { item: TodoItem }) => {
                 </CardContent>
             ) : null}
             {item.notificationRequire ? (
-                        <Typography
-                            className={classes.notificationRoot}
-                            align="center"
-                            variant="body2"
-                            component="p"
-                            color="textSecondary"
-                        >
-                            Notify in{" "}
-                            {new Date(
-                                Notifications.notificationDateToTimestamp(
-                                    item.notificationDate,
-                                    item.notificationTime
-                                )
-                            ).toLocaleString()}
-                        </Typography>
-                    ) : null}
-            {
-                item.done ? <TodoItemCardDestructTimer/>: null
-            }
+                <Typography
+                    className={classes.notificationRoot}
+                    align="center"
+                    variant="body2"
+                    component="p"
+                    color="textSecondary"
+                >
+                    Notify in{" "}
+                    {new Date(
+                        Notifications.notificationDateToTimestamp(
+                            item.notificationDate,
+                            item.notificationTime
+                        )
+                    ).toLocaleString()}
+                </Typography>
+            ) : null}
+            {item.done ? <TodoItemCardDestructTimer /> : null}
         </Card>
     );
 };
