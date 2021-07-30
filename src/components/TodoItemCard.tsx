@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import Card from "@material-ui/core/Card";
 import CardHeader from "@material-ui/core/CardHeader";
 import CardContent from "@material-ui/core/CardContent";
@@ -16,6 +16,7 @@ import {
     todoItemsActions,
 } from "../contexts/TodoItems";
 import Notifications from "../notification-control";
+import { useEffect } from "react";
 
 const useTodoItemCardStyles = makeStyles({
     root: {
@@ -29,7 +30,30 @@ const useTodoItemCardStyles = makeStyles({
     notificationRoot: {
         fontSize: ".75rem",
     },
+    deleteRoot: {
+        fontSize: ".75rem"
+    }
 });
+
+
+const TodoItemCardDestructTimer = () => {
+    const classes = useTodoItemCardStyles();
+    const [remainTime, setRemainTime] = useState(300);
+    useEffect(() => {
+        let timeout = setTimeout(() => setRemainTime(remainTime - 1), 1000);
+        return () => clearTimeout(timeout);
+    }, [remainTime])
+        return <Typography
+                className={classes.deleteRoot}
+                align="center"
+                variant="body2"
+                component="p"
+                color="textSecondary"
+        >
+            Will be deleted via  {`${Math.floor(remainTime / 60)}:${remainTime % 60}`} min. 
+        </Typography>
+}
+
 
 const TodoItemCard = ({ item }: { item: TodoItem }) => {
     const classes = useTodoItemCardStyles();
@@ -50,11 +74,23 @@ const TodoItemCard = ({ item }: { item: TodoItem }) => {
         [item.id, dispatch]
     );
 
+    useEffect(() => {
+        let timeout: NodeJS.Timeout | undefined;
+        if (item.done) {
+            timeout = setTimeout(() => {
+                dispatch(todoItemsActions.deleteItem(item.id))
+            }, 300 * 1000);
+        } else {
+            if (timeout)
+                clearTimeout(timeout)
+        }
+        return () => {
+            if(timeout) clearTimeout(timeout)
+        }
+    }, [item.done]);
     return (
         <Card
-            className={classnames(classes.root, {
-                [classes.doneRoot]: item.done,
-            })}
+            className={classes.root}
         >
             <CardHeader
                 action={
@@ -69,6 +105,9 @@ const TodoItemCard = ({ item }: { item: TodoItem }) => {
                 }
                 title={
                     <FormControlLabel
+                        className={classnames({
+                            [classes.doneRoot]: item.done,
+                        })}
                         control={
                             <Checkbox
                                 checked={item.done}
@@ -86,7 +125,9 @@ const TodoItemCard = ({ item }: { item: TodoItem }) => {
                     <Typography variant="body2" component="p">
                         {item.details}
                     </Typography>
-                    {item.notificationRequire ? (
+                </CardContent>
+            ) : null}
+            {item.notificationRequire ? (
                         <Typography
                             className={classes.notificationRoot}
                             align="center"
@@ -103,8 +144,9 @@ const TodoItemCard = ({ item }: { item: TodoItem }) => {
                             ).toLocaleString()}
                         </Typography>
                     ) : null}
-                </CardContent>
-            ) : null}
+            {
+                item.done ? <TodoItemCardDestructTimer/>: null
+            }
         </Card>
     );
 };

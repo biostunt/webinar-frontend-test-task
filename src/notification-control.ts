@@ -23,7 +23,6 @@ export default class NotificationControl {
     }
 
     public static deleteNotificationTask(id: string) {
-        console.log("deleteNotificationTask", id);
         NotificationControl._notificationTasks =
             NotificationControl._notificationTasks.filter((task) => {
                 if (task.id === id) {
@@ -38,7 +37,6 @@ export default class NotificationControl {
         let id = generateId();
         if (Notification.permission === "denied") return id;
         if (Notification.permission === "granted") {
-            console.log(timestamp - Date.now());
             let timeoutId = setTimeout(
                 () =>
                     NotificationControl.createNotification(id, title, {
@@ -81,7 +79,6 @@ export default class NotificationControl {
     }
 
     private static addNotificationTask(id: string, timeoutId: NodeJS.Timeout) {
-        console.log("addNotificationTask", id, timeoutId);
         NotificationControl._notificationTasks.push({ id, timeoutId });
     }
 

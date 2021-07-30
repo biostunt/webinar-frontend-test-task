@@ -48,7 +48,6 @@ const reducer = (
                 draftState.itemToChange = undefined;
                 return draftState;
             case "changeItem":
-                console.log("changeItem");
                 const index = draftState.todoItems.findIndex(
                     ({ id }) => id === action.data.id
                 );
